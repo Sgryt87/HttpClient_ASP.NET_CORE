@@ -9,7 +9,7 @@ namespace Movies.Client
 {
     class Program
     {
- 
+
         static async Task Main(string[] args)
         {
             // create a new ServiceCollection 
@@ -19,7 +19,7 @@ namespace Movies.Client
 
             // create a new ServiceProvider
             var serviceProvider = serviceCollection.BuildServiceProvider();
-            
+
             // For demo purposes: overall catch-all to log any exception that might 
             // happen to the console & wait for key input afterwards so we can easily 
             // inspect the issue.  
@@ -34,10 +34,10 @@ namespace Movies.Client
             {
                 // log the exception
                 var logger = serviceProvider.GetService<ILogger<Program>>();
-                logger.LogError(generalException, 
+                logger.LogError(generalException,
                     "An exception happened while running the integration service.");
             }
-            
+
             Console.ReadKey();
         }
 
@@ -54,10 +54,10 @@ namespace Movies.Client
             // scoped lifetime
 
             // For the CRUD demos
-            serviceCollection.AddScoped<IIntegrationService, CRUDService>();
+            //serviceCollection.AddScoped<IIntegrationService, CRUDService>();
 
             // For the partial update demos
-            // serviceCollection.AddScoped<IIntegrationService, PartialUpdateService>();
+            serviceCollection.AddScoped<IIntegrationService, PartialUpdateService>();
 
             // For the stream demos
             // serviceCollection.AddScoped<IIntegrationService, StreamService>();
