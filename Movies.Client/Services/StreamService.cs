@@ -14,7 +14,13 @@ namespace Movies.Client.Services
 {
     public class StreamService : IIntegrationService
     {
-        private static HttpClient _httpClient = new HttpClient();
+        //private static HttpClient _httpClient = new HttpClient();
+
+        private static HttpClient _httpClient = new HttpClient(
+            new HttpClientHandler()
+            {
+                AutomaticDecompression = System.Net.DecompressionMethods.GZip
+            });
 
         public StreamService()
         {
@@ -32,9 +38,10 @@ namespace Movies.Client.Services
             //await TestGetPostWithAndCompletionMode();
             //await PostPosterWithStream();
             //await PostAndReadPosterWithStream();
-            await TestPostPosterWithoutStream();
-            await TestPostPosterWithStream();
-            await TestPostAndReadPosterWithStream();
+            //await TestPostPosterWithoutStream();
+            //await TestPostPosterWithStream();
+            //await TestPostAndReadPosterWithStream();
+            await GetPosterWithGZipCompression();
         }
 
         private async Task GetPosterWithStream()
@@ -59,6 +66,22 @@ namespace Movies.Client.Services
                 //        // do something with the poster
                 //    }
                 //}
+            }
+        }
+
+        private async Task GetPosterWithGZipCompression()
+        {
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                $"api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters/{Guid.NewGuid()}");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Headers.AcceptEncoding.Add(new StringWithQualityHeaderValue("gzip"));
+
+            using (var response = await _httpClient.SendAsync(request))
+            {
+                response.EnsureSuccessStatusCode();
+                var stream = await response.Content.ReadAsStreamAsync();
+                var poster = stream.ReadAndDeserializeFromJson<Poster>();
             }
         }
 
