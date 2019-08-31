@@ -31,7 +31,10 @@ namespace Movies.Client.Services
             //await TestGetPostWithStream();
             //await TestGetPostWithAndCompletionMode();
             //await PostPosterWithStream();
-            await PostAndReadPosterWithStream();
+            //await PostAndReadPosterWithStream();
+            await TestPostPosterWithoutStream();
+            await TestPostPosterWithStream();
+            await TestPostAndReadPosterWithStream();
         }
 
         private async Task GetPosterWithStream()
@@ -181,7 +184,36 @@ namespace Movies.Client.Services
             };
         }
 
+        public async Task PostPosterWithoutStream()
+        {
+            // generate a movie poster of 500kb
+            var random = new Random();
+            var generatedBytes = new byte[524288];
+            random.NextBytes(generatedBytes);
+
+            var posterForCreation = new PosterForCreation()
+            {
+                Name = "A new poster for The Big Lebowski",
+                Bytes = generatedBytes
+            };
+
+            var serializedPisterForCreation = JsonConvert.SerializeObject(posterForCreation);
+
+            var request = new HttpRequestMessage(HttpMethod.Post,
+                "api/movies/d8663e5e-7494-4f81-8739-6e0de1bea7ee/posters");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            request.Content = new StringContent(serializedPisterForCreation);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var content = await response.Content.ReadAsStringAsync();
+            var createdMovie = JsonConvert.DeserializeObject<Poster>(content);
+        }
+
         // ########### PERF. TESTING ########### 
+        // GET
         public async Task TestGetPostWithoutStream()
         {
             // warmup
@@ -232,6 +264,62 @@ namespace Movies.Client.Services
 
             stopWatch.Stop();
             Console.WriteLine($"Elapsed milliseconds witht stream and completion: " +
+                $"{stopWatch.ElapsedMilliseconds}, " +
+                $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
+        }
+
+        // POST
+
+        private async Task TestPostPosterWithoutStream()
+        {
+            // warmup
+            await PostPosterWithoutStream();
+
+            var stopWatch = Stopwatch.StartNew();
+
+            for (int i = 0; i < 200; i++)
+            {
+                await PostPosterWithoutStream();
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine($"Elapsed milliseconds withtout stream: " +
+                $"{stopWatch.ElapsedMilliseconds}, " +
+                $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
+        }
+
+        private async Task TestPostPosterWithStream()
+        {
+            // warmup
+            await PostPosterWithStream();
+
+            var stopWatch = Stopwatch.StartNew();
+
+            for (int i = 0; i < 200; i++)
+            {
+                await PostPosterWithStream();
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine($"Elapsed milliseconds witht stream: " +
+                $"{stopWatch.ElapsedMilliseconds}, " +
+                $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
+        }
+
+        private async Task TestPostAndReadPosterWithStream()
+        {
+            // warmup
+            await PostAndReadPosterWithStream();
+
+            var stopWatch = Stopwatch.StartNew();
+
+            for (int i = 0; i < 200; i++)
+            {
+                await PostPosterWithoutStream();
+            }
+
+            stopWatch.Stop();
+            Console.WriteLine($"Elapsed milliseconds witht stream and reading stream: " +
                 $"{stopWatch.ElapsedMilliseconds}, " +
                 $"averaging {stopWatch.ElapsedMilliseconds / 200} milliseconds/request");
         }
