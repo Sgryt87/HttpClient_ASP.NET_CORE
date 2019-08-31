@@ -15,11 +15,24 @@ namespace Movies.Client.Services
         private readonly CancellationTokenSource _cancellationTokenSource =
             new CancellationTokenSource();
 
+        private readonly IHttpClientFactory _httpClientFactory;
+        //private readonly MoviesClient _moviesClient;
+
+        public HttpClientFactoryInstanceManagementService(IHttpClientFactory httpClientFactory
+            ) // MoviesClient moviesClient
+        {
+            _httpClientFactory = httpClientFactory;
+            //_moviesClient = moviesClient;
+        }
 
         public async Task Run()
         {
             //await TestDisposeHttpClient(_cancellationTokenSource.Token);
             // await TestReuseHttpClient(_cancellationTokenSource.Token);
+            await GetMoviesWithHttpClientFromFactory(_cancellationTokenSource.Token);
+            // await GetMoviesWithNamedHttpClientFromFactory(_cancellationTokenSource.Token);
+            // await GetMoviesWithTypedHttpClientFromFactory(_cancellationTokenSource.Token);
+            //await GetMoviesViaMoviesClient(_cancellationTokenSource.Token);
         }
 
         private async Task TestDisposeHttpClient(CancellationToken cancellationToken)
@@ -68,6 +81,27 @@ namespace Movies.Client.Services
             }
         }
 
-     
+        private async Task GetMoviesWithHttpClientFromFactory(
+            CancellationToken cancellationToken)
+        {
+            var httpClient = _httpClientFactory.CreateClient();
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Get,
+                "http://localhost:57863/api/movies");
+            request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+            using (var response = await httpClient.SendAsync(request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken))
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                response.EnsureSuccessStatusCode();
+                var movies = stream.ReadAndDeserializeFromJson<List<Movie>>();
+            }
+
+        }
+
+      
     }
 }
