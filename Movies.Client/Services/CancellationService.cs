@@ -17,7 +17,7 @@ namespace Movies.Client.Services
           {
               AutomaticDecompression = System.Net.DecompressionMethods.GZip
           });
-        private CancellationTokenSource _cancellationTokenSource =
+        private CancellationTokenSource _cancellationTokenSource = 
             new CancellationTokenSource();
 
         public CancellationService()
@@ -47,7 +47,7 @@ namespace Movies.Client.Services
             //var cancellationTokenSource = new CancellationTokenSource();
             //cancellationTokenSource.CancelAfter(2000);
             try
-            {
+            { 
                 using (var response = await _httpClient.SendAsync(request,
                    HttpCompletionOption.ResponseHeadersRead,
                    cancellationToken))

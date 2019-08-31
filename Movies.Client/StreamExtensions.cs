@@ -39,7 +39,7 @@
 
 //            if (!stream.CanWrite)
 //            {
-//                throw new NotSupportedException("Can't write to this stream");
+//                throw new NotSupportedException("Can't write to this stream.");
 //            }
 
 //            using (var streamWriter = new StreamWriter(stream, new UTF8Encoding(), 1024, true))
@@ -52,5 +52,7 @@
 //                }
 //            }
 //        }
+
+
 //    }
 //}

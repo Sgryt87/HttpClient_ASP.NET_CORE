@@ -17,23 +17,24 @@ namespace Movies.Client.Services
 
         public CRUDService()
         {
+            // set up HttpClient instance
             _httpClient.BaseAddress = new Uri("http://localhost:57863");
             _httpClient.Timeout = new TimeSpan(0, 0, 30);
             _httpClient.DefaultRequestHeaders.Clear();
             //_httpClient.DefaultRequestHeaders.Accept.Add(
             //    new MediaTypeWithQualityHeaderValue("application/json"));
             //_httpClient.DefaultRequestHeaders.Accept.Add(
-            //   new MediaTypeWithQualityHeaderValue("application/xml", 0.9));
-        }
-        public async Task Run()
-        {
-            //await GetResource();
-            //await GetResourceThroughHttpRequestMessage();
-            //await CreateResource();
-            //await UpdateResource();
-            await DeleteResource();
+            //    new MediaTypeWithQualityHeaderValue("application/xml", 0.9));
         }
 
+        public async Task Run()
+        {
+            // await GetResource();
+            // await GetResourceThroughHttpRequestMessage();
+            // await CreateResource();
+            // await UpdateResource();
+            await DeleteResource();
+        }
 
         public async Task GetResource()
         {
@@ -41,13 +42,11 @@ namespace Movies.Client.Services
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             var movies = new List<Movie>();
-
             if (response.Content.Headers.ContentType.MediaType == "application/json")
             {
                 movies = JsonConvert.DeserializeObject<List<Movie>>(content);
             }
-
-            if (response.Content.Headers.ContentType.MediaType == "application/xml")
+            else if (response.Content.Headers.ContentType.MediaType == "application/xml")
             {
                 var serializer = new XmlSerializer(typeof(List<Movie>));
                 movies = (List<Movie>)serializer.Deserialize(new StringReader(content));
@@ -64,6 +63,7 @@ namespace Movies.Client.Services
 
             var content = await response.Content.ReadAsStringAsync();
             var movies = JsonConvert.DeserializeObject<List<Movie>>(content);
+
         }
 
         public async Task CreateResource()
@@ -72,16 +72,19 @@ namespace Movies.Client.Services
             {
                 Title = "Reservoir Dogs",
                 Description = "After a simple jewelry heist goes terribly wrong, the " +
-                "surviving criminals begin to suspect that one of them is a police informant.",
+                 "surviving criminals begin to suspect that one of them is a police informant.",
                 DirectorId = Guid.Parse("d28888e9-2ba9-473a-a40f-e38cb54f9b35"),
                 ReleaseDate = new DateTimeOffset(new DateTime(1992, 9, 2)),
                 Genre = "Crime, Drama"
             };
 
             var serializedMovieToCreate = JsonConvert.SerializeObject(movieToCreate);
+
             var request = new HttpRequestMessage(HttpMethod.Post, "api/movies");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
             request.Content = new StringContent(serializedMovieToCreate);
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -103,7 +106,7 @@ namespace Movies.Client.Services
 
             var serializedMovieToUpdate = JsonConvert.SerializeObject(movieToUpdate);
 
-            var request = new HttpRequestMessage(HttpMethod.Put,
+            var request = new HttpRequestMessage(HttpMethod.Put, 
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             request.Content = new StringContent(serializedMovieToUpdate);
@@ -118,7 +121,7 @@ namespace Movies.Client.Services
 
         private async Task DeleteResource()
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete,
+            var request = new HttpRequestMessage(HttpMethod.Delete, 
                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
@@ -127,8 +130,7 @@ namespace Movies.Client.Services
 
             var content = await response.Content.ReadAsStringAsync();
         }
-        
-        // SHORTCUTS
+
         private async Task PostResourceShortcut()
         {
             var movieToCreate = new MovieForCreation()
@@ -147,6 +149,7 @@ namespace Movies.Client.Services
                     JsonConvert.SerializeObject(movieToCreate),
                     Encoding.UTF8,
                     "application/json"));
+
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
@@ -165,11 +168,11 @@ namespace Movies.Client.Services
             };
 
             var response = await _httpClient.PutAsync(
-                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b",
-                 new StringContent(
-                     JsonConvert.SerializeObject(movieToUpdate),
-                     Encoding.UTF8,
-                     "application/json"));
+               "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b",
+               new StringContent(
+                   JsonConvert.SerializeObject(movieToUpdate),
+                   System.Text.Encoding.UTF8,
+                   "application/json"));
 
             response.EnsureSuccessStatusCode();
 
@@ -180,7 +183,7 @@ namespace Movies.Client.Services
         private async Task DeleteResourceShortcut()
         {
             var response = await _httpClient.DeleteAsync(
-                 "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
+                "api/movies/5b1c2b4d-48c7-402a-80c3-cc796ad49c6b");
             response.EnsureSuccessStatusCode();
 
             var content = await response.Content.ReadAsStringAsync();
