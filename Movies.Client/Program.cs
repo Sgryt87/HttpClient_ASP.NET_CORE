@@ -74,6 +74,10 @@ namespace Movies.Client
             {
                 AutomaticDecompression = System.Net.DecompressionMethods.GZip
             });
+            // TODO: 
+            // 1. Authentication (passing and refreshing an access token
+            // 2. Caching (client side cache implementation
+            // 3. Implementing HSTS support
 
             //serviceCollection.AddHttpClient<MoviesClient>()
             //    .ConfigurePrimaryHttpMessageHandler(handler =>
