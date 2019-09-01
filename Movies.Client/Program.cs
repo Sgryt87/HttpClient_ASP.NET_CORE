@@ -68,18 +68,19 @@ namespace Movies.Client
                 client.Timeout = new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Clear();
             })
+            .AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
             .ConfigurePrimaryHttpMessageHandler(handler =>
             new HttpClientHandler()
             {
                 AutomaticDecompression = System.Net.DecompressionMethods.GZip
             });
 
-            serviceCollection.AddHttpClient<MoviesClient>()
-                .ConfigurePrimaryHttpMessageHandler(handler =>
-                new HttpClientHandler()
-                {
-                    AutomaticDecompression = System.Net.DecompressionMethods.GZip
-                });
+            //serviceCollection.AddHttpClient<MoviesClient>()
+            //    .ConfigurePrimaryHttpMessageHandler(handler =>
+            //    new HttpClientHandler()
+            //    {
+            //        AutomaticDecompression = System.Net.DecompressionMethods.GZip
+            //    });
 
 
             // register the integration service on our container with a 
@@ -101,10 +102,10 @@ namespace Movies.Client
             //serviceCollection.AddScoped<IIntegrationService, HttpClientFactoryInstanceManagementService>();
 
             // For the dealing with errors and faults demos
-            serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
+            //serviceCollection.AddScoped<IIntegrationService, DealingWithErrorsAndFaultsService>();
 
             // For the custom http handlers demos
-            // serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();     
+            serviceCollection.AddScoped<IIntegrationService, HttpHandlersService>();
         }
     }
 }
