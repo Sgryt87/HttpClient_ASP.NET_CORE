@@ -59,7 +59,6 @@ namespace Movies.Client
             .ConfigurePrimaryHttpMessageHandler(handler =>
             new HttpClientHandler()
             {
-                AutomaticDecompression = System.Net.DecompressionMethods.GZip
             });
 
             serviceCollection.AddHttpClient<MoviesClient>(client =>
@@ -68,6 +67,7 @@ namespace Movies.Client
                 client.Timeout = new TimeSpan(0, 0, 30);
                 client.DefaultRequestHeaders.Clear();
             })
+            .AddHttpMessageHandler(handler => new TimeOutDelegatingHandler(TimeSpan.FromSeconds(10))) // timing out
             .AddHttpMessageHandler(handler => new RetryPolicyDelegatingHandler(2))
             .ConfigurePrimaryHttpMessageHandler(handler =>
             new HttpClientHandler()
